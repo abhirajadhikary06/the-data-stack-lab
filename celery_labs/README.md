@@ -34,3 +34,69 @@ task_annotations = {
 ### Adding workers has two different meaning
 - 1. Adding concurrency
 - 2. Different worker for different work instances
+
+### To run Schedule (Celery Beat)
+- `celery -A celery_app beat --loglevel=info`
+
+### What does celerybeat-schedule stores
+- last execution timestamp
+- next scheduled run
+- task metadata
+- schedule hash
+
+### To debug schedule check CLI command for redis
+`LRANGE celery 0 -1`
+
+## Concurrency models (how Celery executes tasks)
+### A. prefork (default)
+- Uses multiple OS processes
+- Each process runs independently
+`
+Master process
+   ↓ forks
+Worker 1 (process)
+Worker 2 (process)
+Worker 3 (process)
+`
+`
+Worker Master
+ ├── Process 1 → task
+ ├── Process 2 → task
+ ├── Process 3 → task
+ └── Process 4 → task
+ `
+#### CLI Commands for prefork
+`
+celery -A celery_app worker --pool=prefork --concurrency=4
+`
+### B. threads
+- Uses Python threads instead of processes
+#### CLI Commands for threads
+`
+celery -A celery_app worker --pool=threads --concurrency=10
+`
+### C. gevent
+- Greenlets (cooperative lightweight threads)
+`
+celery -A celery_app worker --pool=gevent --concurrency=100
+`
+### D. eventlet
+- Similar to gevent but older ecosystem.
+`
+celery -A celery_app worker --pool=eventlet --concurrency=100
+`
+
+## Playing with worker configurations
+```
+celery -A celery_app worker \  # starting the worker
+  --pool=prefork \             # selecting the concurrency model
+  --concurrency=4 \            # Setting value of concurrency
+  --autoscale=10,3 \           # Autoscaling worker value (10 is max, 3 is min)
+  --prefetch-multiplier=1 \    # reserve task and pass on to workers before execution
+  --max-tasks-per-child=100 \  # Number of tasks per worker
+  --max-memory-per-child=20000 # Memory limit per worker (here we set it to 20MB)
+```
+### Here we use message abstraction layer Kombu that sits between Celery and Redis/RabbitMQ
+- CLI command to run custom queue - `celery -A celery_app worker -Q delayed_task_queue --loglevel=info -E -n delayed-custom-queue`
+
+celery -A celery_app worker -Q etl_queue --loglevel=info -E -n etl-custom-queue
