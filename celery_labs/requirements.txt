@@ -3,3 +3,7 @@ celery[redis]
 celery[sqlalchemy]
 flower
 psycopg2-binary
+faker
+timedelta
+datetime
+polars

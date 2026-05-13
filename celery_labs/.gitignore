@@ -5,3 +5,4 @@ __pycache__/
 .git
 logs/
 data/
+transformed_data/

@@ -1,0 +1,11 @@
+order_id,customer_name,product,category,price,quantity,order_date,status
+3f6a2a58-a2ce-45f4-9758-ff1fb61f0b9f,Francisco Richards,Smartwatch,Electronics,447.51,2,2026-05-12 21:42:30,Shipped
+d6c39563-2749-4c39-8edb-3d971f6862b3,Andrew Everett,Headphones,Electronics,568.29,5,2026-05-12 21:26:30,Cancelled
+a1b06826-b2b6-430d-9883-07f5724b2a1d,Benjamin Chandler,Toaster,Home,568.1,5,2026-05-12 21:14:30,Processing
+4e8d7f9b-a7c3-4eb5-b5ee-71ddbfaf41d5,Matthew Carroll,Desk Lamp,Home,839.42,3,2026-05-12 21:29:30,Shipped
+e3d87688-2f05-4946-aa1a-679ee98d8a9f,Cory Mcbride,Headphones,Electronics,628.33,5,2026-05-12 21:39:30,Shipped
+694cddee-8f2a-498d-80dc-f10a54d98f10,Christopher Holmes,T-Shirt,Apparel,731.94,4,2026-05-12 21:19:30,Shipped
+e2ecfbc0-3997-4f90-a345-95eac88c4bbd,Heather Gregory,Jeans,Apparel,729.79,1,2026-05-12 21:47:30,Shipped
+192902e1-42e0-42f7-ae43-4c194bd2b1ca,Angel Chan,Headphones,Electronics,660.43,1,2026-05-12 21:54:30,Shipped
+87dc8d0e-b307-4f13-b8c8-7a95af25e951,Ryan Kramer,Coffee Maker,Home,229.94,3,2026-05-12 21:21:30,Shipped
+42899227-6222-4170-9e82-5724bcabafa2,Theresa Johnson,T-Shirt,Apparel,880.16,5,2026-05-12 21:37:30,Shipped
