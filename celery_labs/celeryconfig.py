@@ -17,7 +17,8 @@ task_routes = {
 }
 
 task_annotations = {
-    'tasks.math.square': {'rate_limit': '2/m'}
+    'tasks.math.square': {'rate_limit': '2/m'},
+    'tasks.delay.delay_task': {'rate_limit': '10/m'},
 }
 
 beat_schedule = {
