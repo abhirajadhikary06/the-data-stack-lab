@@ -53,7 +53,7 @@ def main():
             current_time = datetime.now().strftime('%H:%M:%S')
             print(f"[{current_time}] Successfully added 10 records.")
             
-            time.sleep(3600)  # Wait for 1 hour
+            time.sleep(30)
     except KeyboardInterrupt:
         print("\nScript stopped by user.")
 
