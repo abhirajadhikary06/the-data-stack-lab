@@ -2,14 +2,17 @@ from celery import shared_task, chain
 from celery_app import app
 import polars as pl
 import os
+import time
 from datetime import datetime
+from observability.metrics import etl_duration_seconds, etl_records_processed, tasks_failed_total
 
 CSV_FILE_PATH = "source/ecommerce_data.csv"
 INTERMEDIATE_PATH = "transformed_data/ingestion_output.parquet"
 
 # INGESTION TASK
-@shared_task
-def ingestion_task():
+@shared_task(bind=True)
+def ingestion_task(self):
+    start_time = time.perf_counter()
     try:
         if not os.path.exists(CSV_FILE_PATH):
             raise FileNotFoundError("CSV file not found")
@@ -17,21 +20,28 @@ def ingestion_task():
         df = pl.read_csv(CSV_FILE_PATH)
         os.makedirs("transformed_data", exist_ok=True)
         df.write_parquet(INTERMEDIATE_PATH)  # Save to disk
+        record_count = len(df)
+        etl_records_processed.labels(task_name="tasks.etl.ingestion_task", status="success").inc(record_count)
+        etl_duration_seconds.labels(task_name="tasks.etl.ingestion_task").observe(time.perf_counter() - start_time)
         
         return {
             "status": "success",
             "stage": "ingestion",
             "timestamp": str(datetime.now()),
-            "records": len(df),
+            "records": record_count,
             "output_file": INTERMEDIATE_PATH,
         }
     except Exception as e:
+        tasks_failed_total.labels(task_name="tasks.etl.ingestion_task").inc()
+        etl_records_processed.labels(task_name="tasks.etl.ingestion_task", status="failed").inc()
+        etl_duration_seconds.labels(task_name="tasks.etl.ingestion_task").observe(time.perf_counter() - start_time)
         raise self.retry(exc=e, countdown=60, max_retries=3)
         return {"status": "failed", "stage": "ingestion", "error": str(e)}
 
 # TRANSFORMATION TASK (chain input)
 @shared_task
 def transformation_task(ingestion_result):
+    start_time = time.perf_counter()
     try:
         # Get file path from previous task result
         if ingestion_result.get("status") != "success":
@@ -68,20 +78,27 @@ def transformation_task(ingestion_result):
         
         output_file = "transformed_data/transformation_output.parquet"
         transformed_df.write_parquet(output_file)
+        record_count = len(transformed_df)
+        etl_records_processed.labels(task_name="tasks.etl.transformation_task", status="success").inc(record_count)
+        etl_duration_seconds.labels(task_name="tasks.etl.transformation_task").observe(time.perf_counter() - start_time)
         
         return {
             "status": "success",
             "stage": "transformation",
             "timestamp": str(datetime.now()),
-            "records": len(transformed_df),
+            "records": record_count,
             "output_file": output_file,
         }
     except Exception as e:
+        tasks_failed_total.labels(task_name="tasks.etl.transformation_task").inc()
+        etl_records_processed.labels(task_name="tasks.etl.transformation_task", status="failed").inc()
+        etl_duration_seconds.labels(task_name="tasks.etl.transformation_task").observe(time.perf_counter() - start_time)
         return {"status": "failed", "stage": "transformation", "error": str(e)}
 
 # LOADING TASK (chain input)
 @shared_task
 def loading_task(transformation_result):
+    start_time = time.perf_counter()
     try:
         if transformation_result.get("status") != "success":
             raise Exception(f"Transformation failed: {transformation_result.get('error')}")
@@ -97,15 +114,21 @@ def loading_task(transformation_result):
             f"transformed_{int(datetime.now().timestamp())}.parquet"
         )
         df.write_parquet(out_path)
+        record_count = len(df)
+        etl_records_processed.labels(task_name="tasks.etl.loading_task", status="success").inc(record_count)
+        etl_duration_seconds.labels(task_name="tasks.etl.loading_task").observe(time.perf_counter() - start_time)
         
         return {
             "status": "success",
             "stage": "loading",
             "timestamp": str(datetime.now()),
-            "records": len(df),
+            "records": record_count,
             "output_path": out_path,
         }
     except Exception as e:
+        tasks_failed_total.labels(task_name="tasks.etl.loading_task").inc()
+        etl_records_processed.labels(task_name="tasks.etl.loading_task", status="failed").inc()
+        etl_duration_seconds.labels(task_name="tasks.etl.loading_task").observe(time.perf_counter() - start_time)
         return {"status": "failed", "stage": "loading", "error": str(e)}
 
 # ORCHESTRATION: Chain tasks together

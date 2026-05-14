@@ -1,4 +1,5 @@
 from celery import shared_task
+from observability.metrics import retry_attempts_total
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 5, 'countdown': 10}, retry_backoff=True)
 def retry_task(self):
@@ -6,6 +7,7 @@ def retry_task(self):
         # Simulation of a task failing
         import random
         if random.random() < 0.5:  # 50% chance of failure
+            retry_attempts_total.labels(task_name="tasks.retries.retry_task").inc()
             raise Exception("Simulated task failure")
         return "Task succeeded"
     except Exception as e:

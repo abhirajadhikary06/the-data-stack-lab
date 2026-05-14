@@ -6,9 +6,15 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692" 
     environment:
       RABBITMQ_DEFAULT_USER: username
       RABBITMQ_DEFAULT_PASS: password
+    command: >
+      sh -c "rabbitmq-server & 
+             sleep 10 && 
+             rabbitmq-plugins enable rabbitmq_prometheus &&
+             wait"
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -50,4 +56,60 @@ services:
       - rabbitmq
       - redis
 
+  # Prometheus - time-series database
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    depends_on:
+      - rabbitmq
+      - redis
 
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis_exporter
+    ports:
+      - "9121:9121"
+    command:
+      - "--redis.addr=redis://redis:6379"
+    depends_on:
+      - redis
+
+  # Celery Prometheus Exporter
+  celery-exporter:
+    build: .
+    container_name: celery_exporter
+    command: celery-prometheus-exporter --broker=amqp://username:password@rabbitmq:5672// --transport-options='{"visibility_timeout":3600}'
+    ports:
+      - "8888:8888"
+    depends_on:
+      - rabbitmq
+      - worker
+
+  # Grafana - visualization dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: 'grafana-piechart-panel'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:

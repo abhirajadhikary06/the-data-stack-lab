@@ -116,3 +116,12 @@ except Exception as e:
 ```
 @shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 5, 'countdown': 10}, retry_backoff=True)
 ```
+
+### Logging
+```
+import logging
+logger = logging.getLogger(__name__)
+logger.info("This is an info log from the log_task.")
+logger.warning("This is a warning log from the log_task.")
+logger.error("This is an error log from the log_task.")
+```
