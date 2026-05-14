@@ -8,6 +8,7 @@ from observability.metrics import etl_duration_seconds, etl_records_processed, t
 
 CSV_FILE_PATH = "source/ecommerce_data.csv"
 INTERMEDIATE_PATH = "transformed_data/ingestion_output.parquet"
+WATERMARK_FILE = "transformed_data/watermark.txt"
 
 # INGESTION TASK
 @shared_task(bind=True)
@@ -16,14 +17,49 @@ def ingestion_task(self):
     try:
         if not os.path.exists(CSV_FILE_PATH):
             raise FileNotFoundError("CSV file not found")
-        
-        df = pl.read_csv(CSV_FILE_PATH)
         os.makedirs("transformed_data", exist_ok=True)
-        df.write_parquet(INTERMEDIATE_PATH)  # Save to disk
-        record_count = len(df)
+
+        # Load watermark (last processed order datetime) if exists
+        last_watermark = None
+        if os.path.exists(WATERMARK_FILE):
+            try:
+                with open(WATERMARK_FILE, "r") as f:
+                    ts = f.read().strip()
+                    if ts:
+                        last_watermark = datetime.fromisoformat(ts)
+            except Exception:
+                last_watermark = None
+
+        # Read CSV and parse order_date into datetime for watermarking
+        df = pl.read_csv(CSV_FILE_PATH)
+        if "order_date" in df.columns:
+            df = df.with_columns(
+                pl.col("order_date").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S", strict=False).alias("order_datetime")
+            )
+
+        # If watermark exists, filter to only new records
+        if last_watermark is not None and "order_datetime" in df.columns:
+            df_new = df.filter(pl.col("order_datetime") > pl.lit(last_watermark))
+        else:
+            df_new = df
+
+        # Save new records (could be empty)
+        df_new.write_parquet(INTERMEDIATE_PATH)
+        record_count = len(df_new)
         etl_records_processed.labels(task_name="tasks.etl.ingestion_task", status="success").inc(record_count)
         etl_duration_seconds.labels(task_name="tasks.etl.ingestion_task").observe(time.perf_counter() - start_time)
         
+        # Update watermark if we processed any records with order_datetime
+        try:
+            if record_count > 0 and "order_datetime" in df_new.columns:
+                max_dt = df_new.select(pl.col("order_datetime").max()).to_series()[0]
+                if max_dt is not None:
+                    with open(WATERMARK_FILE, "w") as f:
+                        f.write(max_dt.isoformat())
+        except Exception:
+            # Do not fail ingestion if watermark update fails
+            pass
+
         return {
             "status": "success",
             "stage": "ingestion",
@@ -36,7 +72,6 @@ def ingestion_task(self):
         etl_records_processed.labels(task_name="tasks.etl.ingestion_task", status="failed").inc()
         etl_duration_seconds.labels(task_name="tasks.etl.ingestion_task").observe(time.perf_counter() - start_time)
         raise self.retry(exc=e, countdown=60, max_retries=3)
-        return {"status": "failed", "stage": "ingestion", "error": str(e)}
 
 # TRANSFORMATION TASK (chain input)
 @shared_task
