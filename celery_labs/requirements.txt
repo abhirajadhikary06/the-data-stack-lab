@@ -1,7 +1,9 @@
 celery
 celery[redis]
 celery[sqlalchemy]
+celery-prometheus-exporter
 flower
+prometheus-client
 psycopg2-binary
 faker
 timedelta

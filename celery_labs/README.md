@@ -97,6 +97,22 @@ celery -A celery_app worker \  # starting the worker
   --max-memory-per-child=20000 # Memory limit per worker (here we set it to 20MB)
 ```
 ### Here we use message abstraction layer Kombu that sits between Celery and Redis/RabbitMQ
-- CLI command to run custom queue - `celery -A celery_app worker -Q delayed_task_queue --loglevel=info -E -n delayed-custom-queue`
+- `from kombu import Queue`
+- CodeSnippet for custom queue
+```
+task_queues = {
+    Queue('delayed_task_queue'),
+}
+```
+- CLI command to run custom queue - `celery -A celery_app worker -n worker1@%h -Q delayed_task_queue --loglevel=info -E -n delayed-custom-queue --pool=prefork --concurrency=2 --prefetch-multiplier=2 --max-tasks-per-child=100 --max-memory-per-child=30000` ;
+`celery -A celery_app worker -n worker2@%h -Q etl_queue --loglevel=info -E -n etl-custom-queue`
+`celery -A celery_app worker -n worker3@%h -Q retry_task_queue --loglevel=info -E -n retry_task_queue`
 
-celery -A celery_app worker -Q etl_queue --loglevel=info -E -n etl-custom-queue
+### Retires
+```
+except Exception as e:
+    raise self.retry(exc=e, countdown=60, max_retries=3)
+```
+```
+@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 5, 'countdown': 10}, retry_backoff=True)
+```

@@ -1,5 +1,14 @@
 services:
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: username
+      RABBITMQ_DEFAULT_PASS: password
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -13,6 +22,7 @@ services:
     volumes:
       - .:/celery
     depends_on:
+      - rabbitmq
       - redis
 
   beat:
@@ -22,15 +32,22 @@ services:
     volumes:
       - .:/celery
     depends_on:
+      - rabbitmq
       - redis
 
   flower:
     build: .
     container_name: flower
-    command: celery -A celery_app flower --port=5555
+    command: >
+      celery -A celery_app flower
+      --port=5555
+      --broker-api=http://username:password@rabbitmq:15672/api/
     ports:
       - "5555:5555"
     volumes:
       - .:/celery
     depends_on:
+      - rabbitmq
       - redis
+
+

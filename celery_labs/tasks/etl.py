@@ -26,6 +26,7 @@ def ingestion_task():
             "output_file": INTERMEDIATE_PATH,
         }
     except Exception as e:
+        raise self.retry(exc=e, countdown=60, max_retries=3)
         return {"status": "failed", "stage": "ingestion", "error": str(e)}
 
 # TRANSFORMATION TASK (chain input)
@@ -110,9 +111,12 @@ def loading_task(transformation_result):
 # ORCHESTRATION: Chain tasks together
 @shared_task(bind=True)
 def daily_etl_pipeline(self):
-    job = chain(
-        ingestion_task.s(),
-        transformation_task.s(),
-        loading_task.s(),
-    )
-    return job.apply_async()
+    try:
+        job = chain(
+            ingestion_task.s(),
+            transformation_task.s(),
+            loading_task.s(),
+        )
+        return job.apply_async()
+    except Exception as e:
+        raise self.retry(exc=e, countdown=60, max_retries=3) # Retry on failure
