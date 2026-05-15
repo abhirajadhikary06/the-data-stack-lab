@@ -27,3 +27,4 @@ Table checkout_audit {
 
 Ref transaction_audit: checkout_transactions.checkout_id < checkout_audit.checkout_id
 ```
+
