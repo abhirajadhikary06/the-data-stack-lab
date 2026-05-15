@@ -10,3 +10,7 @@ timedelta
 datetime
 polars
 numpy
+pyturso
+sqlalchemy-libsql
+libsql
+python-dotenv
