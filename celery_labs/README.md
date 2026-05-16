@@ -102,6 +102,7 @@ def add(x, y):
 ---
 
 # Task Priority Configuration
+- define the function(the folder followed by the file) and in that pass two parameter `queue` and `priority`
 
 ```python
 task_routes = {
@@ -130,11 +131,19 @@ task_routes = {
         "priority": 4,
     },
 }
+### Breakdown — Routes
+
+- `"tasks.math.*":` — pattern matches any task defined in the `tasks/math.py` module (functions inside that file). It tells Celery to send those tasks to `math_task_queue` (the queue defined in the **Queues** section). `"priority": 5` sets the priority value used by brokers that support priorities to prefer/have ordering inside that queue. (Referred from **task_routes** and uses queues defined in **Queues**)
+- `"tasks.delay.*":` — matches tasks in `tasks/delay.py`; routes them to `delayed_task_queue` with priority `6`. This links a logical task module to a physical queue. (Referred from **task_routes**, queue comes from **Queues**)
+- `"tasks.etl.*":` — routes ETL tasks (e.g., `ingestion_task`, `transformation_task`) to `etl_queue` and assigns priority `7`. (Referred from **task_routes** and **Queues**)
+- `"tasks.retries.*":` — routes retry-related tasks to `retry_task_queue` with higher priority `8` so they can be processed ahead when broker honors priority. (Referred from **task_routes** and **Queues**)
+- `"tasks.logger.*":` — routes logging tasks to `log_task_queue` with priority `4`, keeping logging isolated. (Referred from **task_routes** and **Queues**)
 ```
 
 ---
 
 # Task Annotations (Rate Limiting)
+- define the function(the folder followed by the file) and in that pass parameter `rate_limit`
 
 ```python
 task_annotations = {
@@ -145,6 +154,14 @@ task_annotations = {
     "tasks.logger.log_task": {"rate_limit": "1000/m"},
 }
 ```
+
+### Breakdown — Annotations
+
+- `"tasks.math.square": {"rate_limit": "2/m"}` — applies a rate limit to the `square` task defined in `tasks/math.py`. Celery enforces up to 2 calls per minute for that single named task. (Referred from **task_annotations** and the task's module/function name)
+- `"tasks.delay.delay_task": {"rate_limit": "10/m"}` — limits `delay_task` in `tasks/delay.py` to 10 calls per minute. Useful to throttle external systems. (Referred from **task_annotations**)
+- `"tasks.etl.daily_etl_pipeline": {"rate_limit": "1/m"}` — ETL pipeline task runs at most once per minute; separate from the Beat schedule which triggers tasks on a schedule. (Referred from **task_annotations**)
+- `"tasks.retries.retry_task": {"rate_limit": "100/m"}` — allows many retry tasks but still caps burst traffic. (Referred from **task_annotations**)
+- `"tasks.logger.log_task": {"rate_limit": "1000/m"}` — high rate for logging tasks; keeps log task throughput bounded. (Referred from **task_annotations**)
 
 ---
 
@@ -166,6 +183,7 @@ celery -A celery_app beat --loglevel=info
 ```
 
 ## What `celerybeat-schedule` Stores
+- define the schedule name and in that pass two parameter `task` which holds the folder and file path on which scheduling to be dine and `schedule` which takes input in timedelta, datetime, cron expression
 
 * Last execution timestamp
 * Next scheduled run
@@ -200,6 +218,14 @@ beat_schedule = {
     },
 }
 ```
+
+### Breakdown — Beat (Schedule)
+
+- `"heartbeat": {"task": "tasks.heartbeat.heartbeat_task", "schedule": timedelta(minutes=30)}` — defines a scheduled job named `heartbeat` that calls `heartbeat_task` from `tasks/heartbeat.py` every 30 minutes. This entry is stored in the `celerybeat-schedule` DB so the beat process knows next run times. (Referred from **beat_schedule**)
+- `"cron_task": {"task": "tasks.heartbeat.cron_task", "schedule": crontab(minute="*/30")}` — uses a `crontab` expression to run every 30 minutes. The `task` string maps to a specific task by dotted module path. (Referred from **beat_schedule**)
+- `"daily_etl_pipeline": {"task": "tasks.etl.daily_etl_pipeline", "schedule": crontab(minute="*/5")}` — schedules the ETL pipeline task to run every 5 minutes according to the given crontab. (Referred from **beat_schedule**)
+- `"retries_task": {"task": "tasks.retries.retry_task", "schedule": crontab(minute="*/5")}` — scheduled trigger for retry-related maintenance or periodic retries. (Referred from **beat_schedule**)
+- `"log_task": {"task": "tasks.logger.log_task", "schedule": crontab(minute="*")}` — runs logging task every minute. Beat entries refer to task names which must match actual task names defined in the code. (Referred from **beat_schedule**)
 
 ---
 
@@ -319,7 +345,7 @@ from kombu import Queue
 ```
 
 ## Custom Queue Configuration
-
+- define queue with any queue name, just remember to reference the name you use here to the task routes
 ```python
 task_queues = (
     Queue("default"),
@@ -330,6 +356,15 @@ task_queues = (
     Queue("log_task_queue"),
 )
 ```
+
+### Breakdown — Queues
+
+- `Queue("default")`: the fallback queue where tasks without explicit routing are sent. (Referred from **Queues** section)
+- `Queue("math_task_queue")`: queue reserved for math-related tasks; referenced by `task_routes` entries that target `math_task_queue`. (Referred from **Queues** section)
+- `Queue("delayed_task_queue")`: queue for tasks that should run with delay or lower priority; matched by `task_routes`. (Referred from **Queues** section)
+- `Queue("etl_queue")`: queue for ETL pipeline tasks; routes map ETL tasks here. (Referred from **Queues** section)
+- `Queue("retry_task_queue")`: queue for retry/long-running retryable tasks; used by routes that route retries. (Referred from **Queues** section)
+- `Queue("log_task_queue")`: queue for logging tasks to isolate logging workload. (Referred from **Queues** section)
 
 ---
 
@@ -574,3 +609,49 @@ for _ in range(150):
 
 # Grafana Queries
 celery_labs/GRAFANAQUERY.json
+
+---
+
+## SUMMARY — Complete setup & running (concise)
+
+- **Install dependencies:**
+
+```bash
+cd celery_labs
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+- **Start brokers:** run Redis and RabbitMQ (Docker examples):
+
+```bash
+docker run -d --name redis -p 6379:6379 redis:6
+docker run -d --name rabbitmq -p 5672:5672 rabbitmq:3-management
+```
+
+- **Start workers:**
+
+```bash
+celery -A celery_app worker --loglevel=info -E
+
+# or a queue-specific worker
+celery -A celery_app worker -Q etl_queue --loglevel=info -n etl_worker@%h
+```
+
+- **Start beat (scheduler):**
+
+```bash
+celery -A celery_app beat --loglevel=info
+```
+
+- **Quick test:**
+
+```python
+from celery_app import add
+add.delay(2, 3)
+```
+
+- **How pieces map together:** `task_queues` define available queues; `task_routes` maps task name patterns to those queues; `task_annotations` control per-task rate limits; `beat_schedule` triggers tasks on a time schedule.
+
+---
