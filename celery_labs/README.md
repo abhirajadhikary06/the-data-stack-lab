@@ -494,7 +494,7 @@ docker exec -it celery_worker bash
 
 celery -A celery_app beat --loglevel=info
 
-cd celery_labs && source venv/bin/activate
+cd celery_labs && source venv/bin/activate "OR" cd celery_labs && source venv/scripts/activate
 ```
 
 ---
