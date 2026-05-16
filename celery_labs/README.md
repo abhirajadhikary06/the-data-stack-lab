@@ -105,8 +105,30 @@ def add(x, y):
 
 ```python
 task_routes = {
-    'tasks.math.add': {'priority': 9},
-    'tasks.math.mul': {'priority': 0},
+    "tasks.math.*": {
+        "queue": "math_task_queue",
+        "priority": 5,
+    },
+
+    "tasks.delay.*": {
+        "queue": "delayed_task_queue",
+        "priority": 6,
+    },
+
+    "tasks.etl.*": {
+        "queue": "etl_queue",
+        "priority": 7,
+    },
+
+    "tasks.retries.*": {
+        "queue": "retry_task_queue",
+        "priority": 8,
+    },
+
+    "tasks.logger.*": {
+        "queue": "log_task_queue",
+        "priority": 4,
+    },
 }
 ```
 
@@ -116,7 +138,11 @@ task_routes = {
 
 ```python
 task_annotations = {
-    'tasks.math.square': {'rate_limit': '2/m'}
+    "tasks.math.square": {"rate_limit": "2/m"},
+    "tasks.delay.delay_task": {"rate_limit": "10/m"},
+    "tasks.etl.daily_etl_pipeline": {"rate_limit": "1/m"},
+    "tasks.retries.retry_task": {"rate_limit": "100/m"},
+    "tasks.logger.log_task": {"rate_limit": "1000/m"},
 }
 ```
 
@@ -145,6 +171,35 @@ celery -A celery_app beat --loglevel=info
 * Next scheduled run
 * Task metadata
 * Schedule hash
+
+```python
+beat_schedule = {
+    "heartbeat": {
+        "task": "tasks.heartbeat.heartbeat_task",
+        "schedule": timedelta(minutes=30),
+    },
+
+    "cron_task": {
+        "task": "tasks.heartbeat.cron_task",
+        "schedule": crontab(minute="*/30"),
+    },
+
+    "daily_etl_pipeline": {
+        "task": "tasks.etl.daily_etl_pipeline",
+        "schedule": crontab(minute="*/5"),
+    },
+
+    "retries_task": {
+        "task": "tasks.retries.retry_task",
+        "schedule": crontab(minute="*/5"),
+    },
+
+    "log_task": {
+        "task": "tasks.logger.log_task",
+        "schedule": crontab(minute="*"),
+    },
+}
+```
 
 ---
 
@@ -266,9 +321,14 @@ from kombu import Queue
 ## Custom Queue Configuration
 
 ```python
-task_queues = {
-    Queue('delayed_task_queue'),
-}
+task_queues = (
+    Queue("default"),
+    Queue("math_task_queue"),
+    Queue("delayed_task_queue"),
+    Queue("etl_queue"),
+    Queue("retry_task_queue"),
+    Queue("log_task_queue"),
+)
 ```
 
 ---
