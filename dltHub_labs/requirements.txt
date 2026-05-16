@@ -1,0 +1,6 @@
+dlt
+dlt[duckdb]
+dlt[workspace]
+dlt[sql_database]
+psycopg2-binary
+sqlalchemy

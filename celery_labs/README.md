@@ -513,7 +513,4 @@ for _ in range(150):
 ---
 
 # Grafana Queries
-
-```text
-the-data-stack-lab/celery_labs/GRAFANAQUERY.json
-```
+celery_labs/GRAFANAQUERY.json
