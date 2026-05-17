@@ -1,6 +1,10 @@
 # What is dlt by dltHub?
 dlt (short for data load tool) by dltHub is an open-source Python library that automates the tedious parts of building data pipelines, such as schema inference, normalization, and incremental loading. In short it simplifies the data loading part in a data pipeline.
 
+### Imports in your code
+import dlt
+from dlt.sources.sql_database import sql_database, sql_table
+
 ### How to check available sources and destination in dlt
 - dlt initialization help command - `dlt init -h`
 - dlt available sources - `dlt init --list-sources` 
@@ -26,7 +30,7 @@ pipeline = dlt.pipeline(
     pipeline_name="website_checks_log_pipeline",
     destination="duckdb",
     dataset_name="website_checks_log"
-    dev_mode=True
+    dev_mode=True # to be kept with `replace` only
 )
 ```
 
@@ -36,7 +40,7 @@ pipeline = dlt.pipeline(
 `print(f"Pipeline run finished with status: {load_pipeline}")`
 
 ### Querying DuckDB to check if the data is loaded or not
-```
+```text
 import duckdb
 conn = duckdb.connect("website_checks_log_pipeline.duckdb")
 print("Schemas found:", conn.execute("SHOW SCHEMAS").fetchall()) # Check Schema
@@ -45,3 +49,26 @@ print(f"Tables in {dataset_name}:", conn.execute(f"SHOW TABLES FROM {dataset_nam
 table_name = "website_checks_log"
 print(f"Data from {dataset_name}.{table_name}:", conn.execute(f"SELECT * FROM {dataset_name}.{table_name} LIMIT 5").fetchall()) # Query into our required table
 ```
+### How data is updated to the destination
+- `append` - Appends the data to the destination table. When ran repetedly it can duplicate data.
+    `source.apply_hints(incremental=dlt.sources.incremental("checked_at"), write_disposition="append")`
+
+- `replace` - Replaces the data in the destination table with the new data.
+- `merge` - Merges the new data with the existing data in the destination table based on a primary key.
+- These all methods are written a function - `write_disposition="merge"`
+    ### Why is `replace` used with `pipeline.run()` and `merge` with `source.tbl_name.apply_hints()` ?
+        `replace` - Clearing the whole database/dataset for a full refresh. (Global level Policy)
+            - `load_pipeline = pipeline.run(source, write_disposition="replace")`
+            - `replace` acts as `full load`
+            - Some strategies used in `full load` these strategies are to be placed in `config.toml` under `[destination]`
+            ```text
+            [destination]
+            # Set the optimized replace strategy
+            replace_strategy = "staging-optimized"
+            ```
+                - `truncate-and-insert` - fastest strategy, load data to destination after truncating it's current data.
+                - `insert-from-staging` - slowest strategy, first load the data into staging table and then push it in just one transaction to destination after truncating it. 
+                - `staging-optimized` - this strategy has all the upsides of the insert-from-staging but implements certain optimizations for faster loading on some destinations.
+
+        `merge` - Updating specific tables that have primary keys. (Granular levl Policy)
+        `source.website_checks_log.apply_hints(write_disposition="merge", primary_key=["created_at"])`

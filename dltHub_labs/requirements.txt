@@ -4,3 +4,4 @@ dlt[workspace]
 dlt[sql_database]
 psycopg2-binary
 sqlalchemy
+python-dotenv

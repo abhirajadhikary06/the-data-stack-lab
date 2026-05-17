@@ -1,5 +1,7 @@
 import dlt
 from dlt.sources.sql_database import sql_database, sql_table
+from dotenv import load_dotenv
+load_dotenv()
 
 # This loads the credentials from your secrets.toml
 source = sql_database()
