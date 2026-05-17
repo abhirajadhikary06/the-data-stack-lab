@@ -72,3 +72,45 @@ print(f"Data from {dataset_name}.{table_name}:", conn.execute(f"SELECT * FROM {d
 
         `merge` - Updating specific tables that have primary keys. (Granular levl Policy)
         `source.website_checks_log.apply_hints(write_disposition="merge", primary_key=["created_at"])`
+
+## Incremental Loading Strategies in dlt
+```text
+Is data immutable?
+    |
+    ├── YES → append
+    |
+    └── NO
+          |
+          ├── Need latest state only?
+          |        └── merge/upsert
+          |
+          └── Need historical tracking?
+                   └── scd2
+```
+
+### Full Refresh `replace`
+- Deletes old data and reloads everything
+Application: `pipeline.run(source, write_disposition="replace")`
+
+### Append Incremental `append`
+- Never updates old rows, only new rows are appended incremtally after the previous timestamp Application: `source.apply_hints(incremental=dlt.sources.incremental("checked_at"), write_disposition="append")`
+
+### Merge Incremental (upsert)
+- If rows exist UPDATE it else INSERT it
+Application: `source.apply_hints(incremental=dlt.sources.incremental("updated_at"), write_disposition="merge", primary_key=["id"])`
+
+### SCD2 Merge Strategy
+- Keep OLD version INSERT new version (atomatically creates scd type 2 tracking columns like `_dlt_valid_from`, `_dlt_valid_to`, `_dlt_id`)
+Application: `write_disposition={"disposition": "merge", "strategy": "scd2"}`
+
+### Upsert Strategy
+- Special optmised merge based on primary key only, best for data warehouse data syncing
+Application: `write_disposition={"disposition": "merge", "strategy": "upsert"}`
+
+### Inset Only
+- Insert only if the record does not exists
+Application: `write_disposition={"disposition": "merge", "strategy": "insert-only"}`
+
+### Incremental Lag
+- Handles late-arriving data.
+Application: `incremental=dlt.sources.incremental("created_at", lag=3600)`
