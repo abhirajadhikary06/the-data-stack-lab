@@ -100,7 +100,7 @@ Application: `pipeline.run(source, write_disposition="replace")`
 Application: `source.apply_hints(incremental=dlt.sources.incremental("updated_at"), write_disposition="merge", primary_key=["id"])`
 
 ### SCD2 Merge Strategy
-- Keep OLD version INSERT new version (atomatically creates scd type 2 tracking columns like `_dlt_valid_from`, `_dlt_valid_to`, `_dlt_id`)
+- Keep OLD version INSERT new version (dlt atomatically creates scd type 2 tracking columns like `_dlt_valid_from`, `_dlt_valid_to`, `_dlt_id`)
 Application: `write_disposition={"disposition": "merge", "strategy": "scd2"}`
 
 ### Upsert Strategy
@@ -114,3 +114,17 @@ Application: `write_disposition={"disposition": "merge", "strategy": "insert-onl
 ### Incremental Lag
 - Handles late-arriving data.
 Application: `incremental=dlt.sources.incremental("created_at", lag=3600)`
+
+
+
+    # Create a DLT pipeline to load the data into DuckDB
+    pipeline = dlt.pipeline(
+        pipeline_name="website_checks_log_pipeline",
+        destination="duckdb",
+        dataset_name="website_checks_log",
+    #   dev_mode=True # to be used with replace
+    )
+
+#   load_pipeline = pipeline.run(source, write_disposition="replace") # This would replace the existing data in the destination with the new data from the source.
+    load_pipeline = pipeline.run(source)
+    print(f"Pipeline run finished with status: {load_pipeline}")
