@@ -14,3 +14,12 @@ pyturso
 sqlalchemy-libsql
 libsql
 python-dotenv
+pymonetdb
+duckdb
+dask[distributed]
+pandas
+dask[distributed]
+psycopg2-binary
+sqlalchemy
+prefect
+pyarrow

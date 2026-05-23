@@ -12,7 +12,8 @@ from observability.metrics import (
 
 app = Celery('task', 
             include=['tasks.math', 'tasks.heartbeat', 'tasks.etl', 'tasks.delay',
-                     'tasks.retries', 'tasks.logger'])
+                     'tasks.retries', 'tasks.logger', 'telecom_etl.migration.mig_neon_monet',
+                     'telecom_etl.transform.dask_transform'])
 app.config_from_object('celeryconfig')
 
 _TASK_START_TIMES = {}

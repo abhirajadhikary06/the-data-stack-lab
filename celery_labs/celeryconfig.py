@@ -29,6 +29,8 @@ task_queues = (
     Queue("etl_queue"),
     Queue("retry_task_queue"),
     Queue("log_task_queue"),
+    Queue("migration_neon_monet"),
+    Queue("dask_transform")
 )
 
 # ROUTES
@@ -57,6 +59,14 @@ task_routes = {
         "queue": "log_task_queue",
         "priority": 4,
     },
+    "telecom_etl.migration.*": {
+        "queue": "migration_neon_monet",
+        "priority": 9,
+    },
+    "telecom_etl.transform.*": {
+        "queue": "dask_transform",
+        "priority": 10,
+    }
 }
 
 # ANNOTATIONS

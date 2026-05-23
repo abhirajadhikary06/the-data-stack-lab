@@ -453,6 +453,8 @@ logger.error("This is an error log from the log_task.")
 ```bash
 cd celery_labs && source venv/bin/activate
 
+celery -A celery_app worker -n migration_neon_monet_worker7@%h -Q migration_neon_monet --loglevel=info -E
+
 celery -A celery_app worker -n worker6@%h --loglevel=info -E -n idle_worker
 
 celery -A celery_app worker -n log_task_worker4@%h -Q log_task_queue --loglevel=info -E
@@ -493,6 +495,9 @@ docker exec -it redis redis-cli
 docker exec -it celery_worker bash
 
 celery -A celery_app beat --loglevel=info
+
+docker exec -e PREFECT_API_URL=http://prefect_server:4200/api -it celery_worker python /celery/telecom_etl/fct_dim_tables/gold_runner.py /app/data/telecom.db
+
 
 cd celery_labs && source venv/bin/activate "OR" cd celery_labs && source venv/scripts/activate
 ```
@@ -583,6 +588,24 @@ for _ in range(150):
         print("result:", res.result)
     else:
         print("error:", res.result)
+
+# Migration task
+import pymonetdb
+conn = pymonetdb.connect(hostname='monetdb', port=50000, database='telecom_db', username='monetdb', password='monetdb_admin')
+cur = conn.cursor()
+cur.execute('SELECT * FROM raw_telecom_internet_usage LIMIT 5')
+[print(row) for row in cur.fetchall()]
+conn.close()
+
+# DuckDB Data
+import duckdb
+conn = duckdb.connect('/app/data/telecom.db')
+[print(row) for row in conn.execute('SELECT * FROM transformed_telecom_usage LIMIT 5').fetchall()]
+conn.close()
+
+from telecom_etl.transform.dask_transform import run_transform_pipeline
+
+run_transform_pipeline.delay()
 ```
 
 ---

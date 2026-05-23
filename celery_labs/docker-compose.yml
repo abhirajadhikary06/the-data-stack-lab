@@ -15,11 +15,16 @@ services:
              sleep 10 && 
              rabbitmq-plugins enable rabbitmq_prometheus &&
              wait"
+    networks:
+      - celery-network
+
   redis:
     image: redis:7-alpine
     container_name: redis
     ports:
       - "6379:6379"
+    networks:
+      - celery-network
 
   worker:
     build: .
@@ -30,6 +35,9 @@ services:
     depends_on:
       - rabbitmq
       - redis
+    networks:
+      - celery-network
+      - telecom-network
 
   beat:
     build: .
@@ -40,6 +48,8 @@ services:
     depends_on:
       - rabbitmq
       - redis
+    networks:
+      - celery-network
 
   flower:
     build: .
@@ -55,6 +65,8 @@ services:
     depends_on:
       - rabbitmq
       - redis
+    networks:
+      - celery-network
 
   # Prometheus - time-series database
   prometheus:
@@ -71,6 +83,8 @@ services:
     depends_on:
       - rabbitmq
       - redis
+    networks:
+      - celery-network
 
   # Redis Exporter
   redis-exporter:
@@ -82,6 +96,8 @@ services:
       - "--redis.addr=redis://redis:6379"
     depends_on:
       - redis
+    networks:
+      - celery-network
 
   # Celery Prometheus Exporter
   celery-exporter:
@@ -93,6 +109,8 @@ services:
     depends_on:
       - rabbitmq
       - worker
+    networks:
+      - celery-network
 
   # Grafana - visualization dashboard
   grafana:
@@ -109,7 +127,17 @@ services:
       - ./grafana-provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
+    networks:
+      - celery-network
 
 volumes:
   prometheus_data:
   grafana_data:
+
+networks:
+  celery-network:
+    driver: bridge
+    name: celery-network
+  telecom-network:
+    external: true
+    name: telecom-network

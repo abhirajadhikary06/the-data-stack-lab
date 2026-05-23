@@ -1,0 +1,12 @@
+dask[distributed]
+pandas
+polars
+psycopg2-binary
+pymonetdb
+celery
+sqlalchemy
+prefect
+duckdb
+python-dotenv
+polars
+pyarrow

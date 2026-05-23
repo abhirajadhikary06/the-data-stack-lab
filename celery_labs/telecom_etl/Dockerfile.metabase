@@ -1,0 +1,31 @@
+# Multi-stage: copy Metabase jar from official image, run on Debian JRE
+# This gives us glibc compatibility for DuckDB JDBC driver
+
+FROM metabase/metabase:latest AS metabase-source
+
+FROM eclipse-temurin:21-jre-jammy
+
+# Install required system libs
+RUN apt-get update && apt-get install -y \
+    fontconfig \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Metabase jar from official image
+COPY --from=metabase-source /app/metabase.jar /app/metabase.jar
+
+# Create directories
+RUN mkdir -p /app/data /plugins /metabase-data
+
+# Copy DuckDB driver
+COPY metabase-plugins/ /plugins/
+
+ENV MB_PLUGINS_DIR=/plugins
+ENV MB_DB_TYPE=h2
+ENV MB_DB_FILE=/metabase-data/metabase.db
+ENV JAVA_OPTS="-Xmx2g"
+
+EXPOSE 3000
+
+WORKDIR /app
+CMD ["java", "-jar", "/app/metabase.jar"]

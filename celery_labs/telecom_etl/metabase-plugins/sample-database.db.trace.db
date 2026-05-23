@@ -1,0 +1,10 @@
+2026-05-23 19:43:01 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "FACT_TELECOM_USAGE" not found; SQL statement:
+-- Metabase:: userID: 1 queryType: native queryHash: c07c868d6eeccf2dfe243f7cce187cf95d88db11622726a36c8e8333541d3bec
+SELECT
+tower_id,
+AVG(download_speed_mbps) avg_download
+FROM fact_telecom_usage
+GROUP BY tower_id
+ORDER BY avg_download ASC
+LIMIT 10; [42102-214]

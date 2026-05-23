@@ -1,0 +1,129 @@
+services:
+
+  # ─── Destination Database ───────────────────────────────────────────────────
+  monetdb:
+    image: monetdb/monetdb:latest
+    container_name: monetdb
+    ports:
+      - "50000:50000"
+    environment:
+      MDB_DAEMON_PASS: monetdb_pass
+      MDB_CREATE_DBS: telecom_db
+      MDB_DB_ADMIN_PASS: monetdb_admin
+    volumes:
+      - monetdb_data:/var/monetdb5/dbfarm
+    networks:
+      - telecom-network
+      - celery-network
+
+  # ─── Dask Distributed (Transformation) ──────────────────────────────────────
+  dask-scheduler:
+    image: daskdev/dask:latest
+    container_name: dask_scheduler
+    command: dask scheduler
+    ports:
+      - "8786:8786"   # scheduler port
+      - "8787:8787"   # dask dashboard
+    networks:
+      - telecom-network
+
+  dask-worker:
+    image: daskdev/dask:latest
+    container_name: dask_worker
+    command: dask worker tcp://dask-scheduler:8786
+    depends_on:
+      - dask-scheduler
+    volumes:
+      - .:/app
+      - duckdb_data:/app/data    # DuckDB file access
+    networks:
+      - telecom-network
+
+  # ─── Orchestration ───────────────────────────────────────────────────────────
+  prefect-server:
+    image: prefecthq/prefect:3-latest
+    container_name: prefect_server
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - "4200:4200"   # Prefect UI
+    environment:
+      PREFECT_UI_API_URL: http://localhost:4200/api
+      PREFECT_API_DATABASE_CONNECTION_URL: sqlite+aiosqlite:////root/.prefect/prefect.db
+    volumes:
+      - prefect_data:/root/.prefect
+    networks:
+      - telecom-network
+
+  prefect-worker:
+    image: prefecthq/prefect:3-latest
+    container_name: prefect_worker
+    command: prefect worker start --pool telecom-pool
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    volumes:
+      - .:/app
+      - duckdb_data:/app/data    # shared DuckDB file location
+    depends_on:
+      - prefect-server
+      - monetdb
+      - dask-scheduler
+    networks:
+      - telecom-network
+      - celery-network
+
+  # ─── Dashboarding ────────────────────────────────────────────────────────────
+  metabase:
+    build:
+      context: .
+      dockerfile: Dockerfile.metabase
+    container_name: metabase
+    ports:
+      - "3005:3000"
+    environment:
+      MB_DB_TYPE: h2
+    volumes:
+      - metabase_data:/metabase-data
+      - duckdb_data:/app/data
+      - ./metabase-plugins:/plugins
+    depends_on:
+      - prefect-worker
+    networks:
+      - telecom-network
+
+  # ─── Adminer — Web SQL UI ────────────────────────────────────────────────────
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - telecom-network
+
+
+  telecom-app:
+    build: .
+    container_name: telecom_app
+    volumes:
+      - .:/app
+      - duckdb_data:/app/data
+    depends_on:
+      - monetdb
+      - dask-scheduler
+    networks:
+      - telecom-network
+      - celery-network
+
+volumes:
+  monetdb_data:
+  prefect_data:
+  metabase_data:
+  duckdb_data:           # shared volume — DuckDB .db file lives here
+
+networks:
+  telecom-network:
+    driver: bridge
+    name: telecom-network
+
+  celery-network:
+    external: true
+    name: celery-network
