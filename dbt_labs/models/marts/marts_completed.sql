@@ -1,0 +1,1 @@
+select * from {{ ref('int_completed') }} as completed_orders

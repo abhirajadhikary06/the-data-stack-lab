@@ -1,0 +1,34 @@
+name: 'dbt_project_tutorial'
+version: '1.0.0'
+
+profile: 'dbt_project'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:        
+  - "target"
+  - "dbt_packages"
+
+models:
+  dbt_project_tutorial:
+    
+    staging:
+      +schema: staging
+      +tags: ['staging']
+      +materialized: table
+
+    intermediate:
+      +schema: intermediate
+      +tags: ['intermediate']
+      +materialized: table
+
+    marts:
+      +schema: marts
+      +tags: ['marts']
+      +materialized: view
+      

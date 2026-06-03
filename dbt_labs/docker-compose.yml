@@ -1,0 +1,15 @@
+services:
+  dbt:
+    build: .
+    container_name: dbt-duckdb
+
+    working_dir: /app
+
+    volumes:
+      - .:/app
+      - ./duckdb_data:/data
+
+    stdin_open: true
+    tty: true
+
+    command: tail -f /dev/null
