@@ -31,4 +31,23 @@ models:
       +schema: marts
       +tags: ['marts']
       +materialized: view
-      
+
+seeds:
+  dbt_project_tutorial:
+    payment_method_desc:
+      +schema: lookup_tables
+      +tags: ['lookup', 'seed', 'payment_methods']      
+      +column_types:
+        payment_method: varchar
+        description: varchar
+    employee_workspace_country:
+      +schema: lookup_tables
+      +tags: ['lookup', 'seed', 'employee_workspace_country']      
+      +column_types:
+        employee_id: varchar
+        first_name: varchar
+        last_name: varchar
+        company: varchar
+        department: varchar
+        workspace_country: varchar
+        updated_at: timestamp

@@ -1,0 +1,11 @@
+payment_method,description
+Card,Card payment
+UPI,UPI payment
+NetBanking,Net banking payment
+Wallet,Wallet payment
+Cash,Cash payment
+Cheque,Cheque payment
+BankTransfer,Bank transfer payment
+MobilePayment,Mobile payment
+GiftCard,Gift card payment
+Other,Other payment method

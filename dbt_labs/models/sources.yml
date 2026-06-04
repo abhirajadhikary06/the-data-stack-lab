@@ -1,1 +1,21 @@
 version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: products
+        description: "List of all products available in the store"
+        columns:
+          - name: product_id
+            tests:
+              - unique
+              - not_null
+
+      - name: sales
+        description: "Transactions from customers"
+        columns:
+          - name: sale_id
+            tests:
+              - unique
+              - not_null

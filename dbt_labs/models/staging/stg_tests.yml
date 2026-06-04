@@ -17,6 +17,8 @@ models:
         description: "Status of the order (e.g., completed, pending)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['completed', 'pending', 'cancelled']
       - name: order_created_at
         description: "Timestamp when the order was placed."
         tests:
@@ -43,4 +45,30 @@ models:
         description: "Timestamp when the customer was created."
         tests:
           - not_null
-      
+    
+  - name: stg_emp_workspace_country
+    description: "Staging table for employee workspace country data."
+    columns:
+      - name: workspace_country
+        description: "Country of the workspace."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              arguments:
+                value_set: 
+                  - Argentina
+                  - Australia
+                  - Brazil
+                  - Canada
+                  - China
+                  - Germany
+                  - Ghana
+                  - India
+                  - Italy
+                  - Japan
+                  - Mexico
+                  - Nigeria
+                  - Portugal
+                  - Singapore
+                  - Spain
+                  - United Kingdom
+                  - United States

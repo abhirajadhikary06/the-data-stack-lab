@@ -1,0 +1,51 @@
+employee_id,first_name,last_name,company,department,workspace_country,updated_at
+EMP001,Alice,Smith,Salesforce,Engineering,United States,2023-10-01 08:00:00
+EMP002,Rahul,Sharma,Google,Product,India,2023-10-01 08:00:00
+EMP003,Elena,Rossi,Microsoft,Design,Italy,2023-10-01 08:00:00
+EMP004,Kenji,Tanaka,Amazon,Data Science,Japan,2023-10-01 08:00:00
+EMP005,Sarah,Jones,Meta,Human Resources,United Kingdom,2023-10-01 08:00:00
+EMP006,Carlos,Mendoza,Apple,Sales,Mexico,2023-10-01 08:00:00
+EMP007,Wei,Chen,Netflix,Engineering,Singapore,2023-10-01 08:00:00
+EMP008,Julia,Müller,Spotify,Marketing,Germany,2023-10-01 08:00:00
+EMP009,David,Okafor,Tesla,Finance,Nigeria,2023-10-01 08:00:00
+EMP010,Chloe,Tremblay,IBM,Customer Support,Canada,2023-10-01 08:00:00
+EMP011,Lucas,Silva,Oracle,Operations,Brazil,2023-10-01 08:00:00
+EMP012,Emma,Wilson,SAP,Legal,Australia,2023-10-01 08:00:00
+EMP013,Liam,Brown,Adobe,Engineering,United States,2023-10-02 09:15:00
+EMP014,Aarav,Patel,Cisco,Sales,India,2023-10-02 09:15:00
+EMP015,Sofia,Garcia,Intel,Marketing,Spain,2023-10-02 09:15:00
+EMP016,Yuki,Sato,AMD,Product,Japan,2023-10-02 09:15:00
+EMP017,Oliver,Taylor,NVIDIA,Data Science,United Kingdom,2023-10-02 09:15:00
+EMP018,Diego,Lopez,Snowflake,Engineering,Argentina,2023-10-02 09:15:00
+EMP019,Jing,Wu,Databricks,Operations,China,2023-10-02 09:15:00
+EMP020,Anna,Wagner,Atlassian,Finance,Germany,2023-10-02 09:15:00
+EMP021,Kwame,Mensah,Salesforce,Design,Ghana,2023-10-03 10:30:00
+EMP022,Olivia,Martin,Google,Customer Support,Canada,2023-10-03 10:30:00
+EMP023,Mateo,Costa,Microsoft,Legal,Portugal,2023-10-03 10:30:00
+EMP024,Charlotte,Lee,Amazon,Human Resources,Australia,2023-10-03 10:30:00
+EMP025,Ethan,White,Meta,Engineering,United States,2023-10-04 11:45:00
+EMP026,Ananya,Desai,Apple,Data Science,India,2023-10-04 11:45:00
+EMP027,Marco,Bianchi,Netflix,Product,Italy,2023-10-04 11:45:00
+EMP028,Haruto,Takahashi,Spotify,Design,Japan,2023-10-04 11:45:00
+EMP029,Amelia,Harris,Tesla,Sales,United Kingdom,2023-10-05 13:00:00
+EMP030,Javier,Fernandez,IBM,Operations,Mexico,2023-10-05 13:00:00
+EMP031,Zhi,Zhao,Oracle,Engineering,Singapore,2023-10-05 13:00:00
+EMP032,Clara,Schmidt,SAP,Marketing,Germany,2023-10-05 13:00:00
+EMP033,Ngozi,Eze,Adobe,Finance,Nigeria,2023-10-06 14:20:00
+EMP034,Mia,Gagnon,Cisco,Customer Support,Canada,2023-10-06 14:20:00
+EMP035,Gabriel,Alves,Intel,Legal,Brazil,2023-10-06 14:20:00
+EMP036,Harper,Clark,AMD,Human Resources,Australia,2023-10-06 14:20:00
+EMP037,William,Lewis,NVIDIA,Engineering,United States,2023-10-07 15:35:00
+EMP038,Diya,Iyer,Snowflake,Product,India,2023-10-07 15:35:00
+EMP039,Lucia,Romero,Databricks,Design,Spain,2023-10-07 15:35:00
+EMP040,Sota,Ito,Atlassian,Data Science,Japan,2023-10-07 15:35:00
+EMP041,Evelyn,Walker,Salesforce,Sales,United Kingdom,2023-10-08 16:50:00
+EMP042,Thiago,Gomez,Google,Operations,Argentina,2023-10-08 16:50:00
+EMP043,Yan,Liu,Microsoft,Engineering,China,2023-10-08 16:50:00
+EMP044,Leonie,Weber,Amazon,Marketing,Germany,2023-10-08 16:50:00
+EMP045,Kofi,Osei,Meta,Finance,Ghana,2023-10-09 09:00:00
+EMP046,Lily,Roy,Apple,Customer Support,Canada,2023-10-09 09:00:00
+EMP047,Joao,Ferreira,Netflix,Legal,Portugal,2023-10-09 09:00:00
+EMP048,Avery,King,Spotify,Human Resources,Australia,2023-10-09 09:00:00
+EMP049,James,Wright,Tesla,Engineering,United States,2023-10-10 10:15:00
+EMP050,Ishaan,Verma,IBM,Data Science,India,2023-10-10 10:15:00

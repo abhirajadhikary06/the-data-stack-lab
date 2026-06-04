@@ -1,0 +1,21 @@
+raw.sales (
+    sale_id integer,
+    product_id integer,
+    customer_name varchar,
+    city varchar,
+    quantity integer,
+    sale_amount decimal(10,2),
+    payment_method varchar,
+    sale_status varchar,
+    sale_date date
+)
+
+raw.products (
+    product_id integer,
+    product_name varchar,
+    category varchar,
+    brand varchar,
+    unit_price decimal(10,2),
+    is_active boolean,
+    created_at date
+)

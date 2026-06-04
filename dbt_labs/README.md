@@ -84,3 +84,11 @@ models:
           - unique
           - not_null
 ```
+
+for a timestamp-based dbt snapshot, dbt automatically adds:
+
+dbt_valid_from
+dbt_valid_to
+and also usually:
+
+dbt_scd_id
