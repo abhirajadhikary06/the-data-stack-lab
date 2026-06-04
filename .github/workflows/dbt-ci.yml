@@ -38,7 +38,8 @@ jobs:
             outputs:
               dev:
                 type: duckdb
-                path: /tmp/github_actions.duckdb
+                path: ./duckdb_data/analytics.duckdb
+                schema: dev
                 threads: 4
           EOF
 
