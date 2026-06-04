@@ -11,6 +11,9 @@ jobs:
   dbt-ci:
     runs-on: ubuntu-latest
 
+    env:
+      DBT_PROFILES_DIR: ${{ github.workspace }}/.ci-dbt
+
     defaults:
       run:
         working-directory: ./dbt_labs
@@ -31,8 +34,8 @@ jobs:
 
       - name: Create dbt profile
         run: |
-          mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
+          mkdir -p "$DBT_PROFILES_DIR"
+          cat <<EOF > "$DBT_PROFILES_DIR/profiles.yml"
           dbt_project:
             target: dev
             outputs:
