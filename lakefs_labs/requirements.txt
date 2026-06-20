@@ -1,3 +1,6 @@
 lakefs
 polars
 pyarrow
+python-dotenv
+requests
+lakefs-sdk
