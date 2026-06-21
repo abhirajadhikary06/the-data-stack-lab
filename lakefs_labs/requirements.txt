@@ -5,3 +5,9 @@ python-dotenv
 requests
 lakefs-sdk
 markdown
+apache-airflow
+postgres
+psycopg2-binary
+pandas
+numpy
+graphviz
