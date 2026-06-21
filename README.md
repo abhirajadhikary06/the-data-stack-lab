@@ -5,3 +5,7 @@ Topics Covered:
 ### celery_labs
 ### dltHub_labs
 ### dask_labs
+### dbt_labs
+### airflow_labs
+### lakefs_labs
+### data-modelling_labs
