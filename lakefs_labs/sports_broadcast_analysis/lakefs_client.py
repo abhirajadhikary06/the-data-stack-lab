@@ -25,9 +25,9 @@ def create_branch(repo, source, branch):
 
 def commit(repo, branch, message):
     response = requests.post(
-        f"{BASE_URL}/api/v1/repositories/{repo}/commits",
+        f"{BASE_URL}/api/v1/repositories/{repo}/branches/{branch}/commits",
         auth=AUTH,
-        json={"branch": branch, "message": message}
+        json={"message": message, "allow_empty": False, "force": False}
     )
     response.raise_for_status()
     return response.json()
@@ -53,12 +53,33 @@ def push(repo, branch, message):
     commit_response = commit(repo, branch, message)
     return commit_response
 
+def commit_and_push(repo, branch, message):
+    return push(repo, branch, message)
+
+def merge_branches(repo, source_branch, destination_branch):
+    response = requests.post(
+        f"{BASE_URL}/api/v1/repositories/{repo}/refs/{source_branch}/merge/{destination_branch}",
+        auth=AUTH,
+    )
+    response.raise_for_status()
+    return response.json()
+
+def compare_branches(repo, source_branch, destination_branch):
+    response = requests.get(
+        f"{BASE_URL}/api/v1/repositories/{repo}/refs/{source_branch}/diff/{destination_branch}",
+        auth=AUTH,
+    )
+    response.raise_for_status()
+    return response.json()
+
+    
 # --- OBJECT MANAGEMENT ---
-def get_objects(repo, branch):
+def get_object(repo, branch, object_path):
     # list objects under a ref/branch
     response = requests.get(
         f"{BASE_URL}/api/v1/repositories/{repo}/refs/{branch}/objects",
         auth=AUTH,
+        params={"path": object_path}
     )
     response.raise_for_status()
     return response.json()
@@ -91,20 +112,20 @@ def download_object(repo, branch, object_path, destination):
 
 def upload_object(repo, branch, object_path, file_content):
     # simple PUT to objects endpoint using branch as ref and path as query param
-    response = requests.put(
-        f"{BASE_URL}/api/v1/repositories/{repo}/objects",
+    response = requests.post(
+        f"{BASE_URL}/api/v1/repositories/{repo}/branches/{branch}/objects",
         auth=AUTH,
-        params={"branch": branch, "path": object_path},
-        data=file_content,
+        params={"path": object_path},
+        files={"content": (Path(object_path).name, file_content)},
     )
     response.raise_for_status()
     return response.json()
 
 def delete_object(repo, branch, object_path):
     response = requests.delete(
-        f"{BASE_URL}/api/v1/repositories/{repo}/objects",
+        f"{BASE_URL}/api/v1/repositories/{repo}/branches/{branch}/objects",
         auth=AUTH,
-        params={"branch": branch, "path": object_path},
+        params={"path": object_path},
     )
     response.raise_for_status()
     return response.json()

@@ -18,8 +18,8 @@ local_csv = download_object(
 )
 
 # Read and run transformations
-df = pl.read_csv(local_csv)
 df = validate_broadcasts(df)
+df = pl.read_csv(local_csv)
 df = clean_broadcasts(df)
 
 # Write output to data/processed
