@@ -6,7 +6,7 @@ from quality.validity import validate_broadcasts
 from transformation.clean import clean_broadcasts
 from transformation.parquet import write_parquet
 
-# Module 4 pipeline (no upload/commit)
+# Simple Pipeline (no merge/commit/upload) to demonstrate transformations and lakeFS integration
 branch = create_branch("lakefs-tutorial", "main", "feature-polars")
 
 # Download to data/raw
