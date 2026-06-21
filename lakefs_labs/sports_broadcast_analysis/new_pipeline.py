@@ -53,20 +53,6 @@ def pipeline():
             file_content = file_content
         )
 
-        # Commit and Push
-        commit_operation = commit(
-            repo = "lakefs-tutorial",
-            branch = branch,
-            message = input("Enter commit message: ")
-        )
-
-        if commit_operation:
-            commit_id = commit_operation["id"]
-            commit_message = commit_operation["message"]
-            commit_branch = branch
-
-            write_commit_metadata(commit_id, commit_message, commit_branch)
-
         # Compare Branches
         comparison = compare_branches(
             repo = "lakefs-tutorial",
@@ -82,6 +68,20 @@ def pipeline():
             print("No differences found between branches. Skipping merge.")
         else:
             print(f"Differences found: {len(diff_results)} changes ({', '.join(sorted(diff_types))}). Proceeding with merge.")
+            # Commit only when lakeFS sees staged object changes.
+            commit_operation = commit(
+                repo = "lakefs-tutorial",
+                branch = branch,
+                message = input("Enter commit message: ")
+            )
+
+            if commit_operation:
+                commit_id = commit_operation["id"]
+                commit_message = commit_operation["message"]
+                commit_branch = branch
+
+                write_commit_metadata(commit_id, commit_message, commit_branch)
+
             # Merge Branches with main branch
             merge_branches(
                 repo = "lakefs-tutorial",
