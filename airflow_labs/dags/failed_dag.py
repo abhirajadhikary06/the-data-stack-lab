@@ -25,7 +25,8 @@ with DAG(
     dag_id = "failed_dag",
     start_date = datetime(2026, 6, 6),
     schedule_interval = '0 */2 * * *',
-    catchup = False
+    catchup = False,
+    tags = ['example', 'failed']
 )as dag:
     
     task1 = PythonOperator(

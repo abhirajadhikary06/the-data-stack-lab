@@ -1,18 +1,14 @@
-FROM apache/airflow:2.10.2
+FROM apache/airflow:2.9.3-python3.11
 
 USER root
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		build-essential \
-		git \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 USER airflow
 
-WORKDIR /opt/airflow
+COPY requirements.txt /requirements.txt
 
-COPY --chown=airflow:root dags ./dags
-COPY --chown=airflow:root plugins ./plugins
-
+RUN pip install --no-cache-dir -r /requirements.txt

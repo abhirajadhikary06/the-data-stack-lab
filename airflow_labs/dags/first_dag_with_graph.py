@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import PythonOperator # Airflow Python Operator
 from datetime import datetime
 import requests
 
@@ -22,7 +22,8 @@ with DAG(
     dag_id = "first_dag_with_graph",
     start_date = datetime(2026, 6, 6),
     schedule_interval = '@daily',
-    catchup = False
+    catchup = False,
+    tags = ['example', 'graph', 'first']
 )as dag:
     
     task1 = PythonOperator(

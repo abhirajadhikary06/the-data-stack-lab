@@ -9,7 +9,8 @@ with DAG(
     dag_id='first_dag',
     start_date=datetime(2026, 6, 6),
     schedule_interval='@daily',
-    catchup=False
+    catchup=False,
+    tags=['example', 'first']
 ) as dag:
 
     task1 = PythonOperator(
