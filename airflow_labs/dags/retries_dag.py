@@ -1,25 +1,32 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator, ShortCircuitOperator
+from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 from airflow.utils.email import send_email
+import logging
 
 def success_callback(context):
     dag_id = context["dag"].dag_id
-    task_id = context["task"].task_id
-    return f"Task {task_id} in DAG {dag_id} succeeded."
+    # Fixed: Use 'task_instance'
+    task_id = context["task_instance"].task_id 
+    # Use logging instead of return
+    logging.info(f"Task {task_id} in DAG {dag_id} succeeded.")
 
 def failure_callback(context):
     dag_id = context["dag"].dag_id
-    task_id = context["task"].task_id
+    ti = context["task_instance"]
+    task_id = ti.task_id
     exception = context.get("exception")
-    return f"Task {task_id} in DAG {dag_id} failed."
+    
+    logging.error(f"Task {task_id} in DAG {dag_id} failed.")
 
     send_email(
         to="abhirajkviit@gmail.com",
         subject=f"Airflow Task Failure: {task_id} in DAG {dag_id}",
-        html_content=f"""<p>Task <b>{task_id}</b> in DAG <b>{dag_id}</b> has failed.</p>
-                        <p>Exception: {exception}</p>"""
+        html_content=f"""
+        <p>Task <b>{task_id}</b> in DAG <b>{dag_id}</b> has failed.</p>
+        <p>Exception: {exception}</p>
+        """
     )
 
 def risky_task():
@@ -39,16 +46,15 @@ default_args = {
 }
 
 with DAG(
-    dag_id = "retries_dag",
-    default_args = default_args,
-    start_date = days_ago(1),
-    schedule_interval = '@daily',
-    catchup = False,
-    tags =['retries', 'example']
+    dag_id="retries_dag",
+    default_args=default_args,
+    start_date=days_ago(1),
+    schedule_interval='@daily',
+    catchup=False,
+    tags=['retries', 'example']
 ) as dag:
     
     task1 = PythonOperator(
-        task_id = 'risky_task',
-        python_callable = risky_task
+        task_id='risky_task',
+        python_callable=risky_task
     )
-

@@ -1,3 +1,7 @@
 apache-airflow
 postgres
 psycopg2-binary
+apache-airflow-providers-postgres
+groq
+python-dotenv
+openai
