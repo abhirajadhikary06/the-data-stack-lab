@@ -42,7 +42,7 @@ with DAG(
     dag_id = "retries_dag",
     default_args = default_args,
     start_date = days_ago(1),
-    schedule_interval = '*/2 * * * *',
+    schedule_interval = '@daily',
     catchup = False,
     tags =['retries', 'example']
 ) as dag:

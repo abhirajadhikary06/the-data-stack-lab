@@ -39,7 +39,7 @@ def branch_C(sorted_arr, reversed_arr):
 with DAG(
     dag_id = "branching_and_circuit_dag",
     start_date = datetime(2026, 6, 21),
-    schedule = '*/1 * * * *',
+    schedule = '@daily',
     catchup = False,
     tags = ['example', 'branching', 'shortcircuit']
 )as dag:
