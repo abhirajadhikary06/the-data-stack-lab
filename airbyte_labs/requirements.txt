@@ -1,0 +1,7 @@
+airbyte
+python-dotenv
+polars
+pyarrow
+great-expectations
+psycopg2-binary
+sqlalchemy

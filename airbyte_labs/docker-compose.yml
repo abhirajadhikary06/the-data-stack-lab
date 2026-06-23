@@ -1,0 +1,21 @@
+services:
+
+  airbyte:
+    image: airbyte/airbyte:latest
+    container_name: airbyte
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airbyte-python-app
+    depends_on:
+      - airbyte
+    environment:
+      AIRBYTE_SERVER_URL: http://airbyte:8000
+    volumes:
+      - .:/app
+    command: python main.py
