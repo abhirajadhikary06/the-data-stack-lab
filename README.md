@@ -77,3 +77,12 @@ Hands-on exercises covering dimensional modeling, star schemas, snowflake schema
 
 **Location:**
 `data-modelling_labs/`
+
+---
+
+### Kafka Labs
+
+Hands-on excercises on the distributed event stream platform covering producer, consumer, architectures.
+
+**Location:**
+`kafka_labs/`
