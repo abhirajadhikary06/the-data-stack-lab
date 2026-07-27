@@ -1,0 +1,15 @@
+# ubuntu image as the base image
+FROM ubuntu:latest
+# working directory on docker as `app`
+WORKDIR /app
+# copy our local files to docker directory
+COPY . /app
+COPY requirements.txt /app/
+# run installation of dependencies and system files
+RUN apt-get update && apt-get install -y python3 python3-pip && pip3 install --no-cache-dir --break-system-packages -r requirements.txt
+# set the environment file
+ENV NAME=basic-ubuntu-image
+# run endpoint
+ENTRYPOINT ["python3"]
+# command to run
+CMD ["basic-app.py"]

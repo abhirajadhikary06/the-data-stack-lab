@@ -1,0 +1,12 @@
+# docker image
+FROM alpine:latest 
+# directory of the project inside docker
+WORKDIR /app
+# copy project files into the container
+COPY . .
+# install necessary packages
+RUN apk add --no-cache python3 py3-pip && python3 -m pip install --no-cache-dir --break-system-packages -r requirements.txt
+# environment variable
+ENV NAME=world
+# run command to start application
+CMD ["python3", "basic-app.py"]
