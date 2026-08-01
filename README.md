@@ -85,4 +85,13 @@ Hands-on exercises covering dimensional modeling, star schemas, snowflake schema
 Hands-on excercises on the distributed event stream platform covering producer, consumer, architectures.
 
 **Location:**
-`kafka_labs/`
+`kafka_labs/` 
+
+---
+
+### PySpark Labs
+
+Hands-on excercises on the distributed data processing framework.
+
+**Location:**
+`pyspark_labs/`
