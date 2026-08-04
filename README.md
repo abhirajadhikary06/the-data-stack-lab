@@ -95,3 +95,12 @@ Hands-on excercises on the distributed data processing framework.
 
 **Location:**
 `pyspark_labs/`
+
+---
+
+### Delta Lake Labs
+
+Hands-on excercises on the data lakehouse along with Spark process.
+
+**Location:**
+`delta-lake_labs/`
