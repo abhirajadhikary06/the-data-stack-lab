@@ -104,3 +104,12 @@ Hands-on excercises on the data lakehouse along with Spark process.
 
 **Location:**
 `delta-lake_labs/`
+
+---
+
+### Databricks Labs
+
+Hands-on excercises on Databricks, a unified, cloud-based platform built on Apache Spark that lets teams store, process, clean, and share massive amounts of data for analytics and artificial intelligence.
+
+**Location:**
+`databricks_labs/`
